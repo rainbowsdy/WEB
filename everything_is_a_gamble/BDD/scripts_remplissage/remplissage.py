@@ -2,7 +2,6 @@ import requests
 import psycopg2
 import time
 from datetime import datetime
-import requests
 
 try:
     r = requests.get("https://www.google.com")
