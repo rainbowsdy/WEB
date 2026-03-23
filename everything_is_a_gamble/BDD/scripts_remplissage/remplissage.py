@@ -63,6 +63,7 @@ def fetch_and_store():
     data = response.json()
 
     stations = data["data"]["stations"]
+    timestamp = data["last_updated"]
 
 
 
@@ -74,8 +75,6 @@ def fetch_and_store():
                 velo_elec = v["count"]
             elif v["vehicle_type_id"] == "mechanical":
                 velo_normal = v["count"]
-
-        timestamp = station["last_reported"]
 
         try:
             cursor.execute("""

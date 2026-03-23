@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # Vérifier que PostgreSQL est accessible
 if pg_isready -h localhost -p 5432; then
