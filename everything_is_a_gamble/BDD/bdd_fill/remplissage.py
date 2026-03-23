@@ -38,12 +38,14 @@ def init_stations():
     for station in stations:
         station_id = station["station_id"]
         name = station["name"]
+        if name == "":
+            name=station_id
 
         try:
             cursor.execute("""
                 INSERT INTO nom_stations (nom, id_station)
                 VALUES (%s, %s)
-                ON CONFLICT (id_station) DO NOTHING;
+                ON CONFLICT (id_station) DO UPDATE SET nom = EXCLUDED.nom;
             """, (name, station_id))
         except Exception as e:
             print("Erreur insertion status:", e)
@@ -51,7 +53,7 @@ def init_stations():
         else:
             conn.commit()
 
-    print("Stations initialisées !")
+    print("Stations actualisée !")
 
 # --------------------------------------------------
 # RÉCUPÉRATION DES DONNÉES TOUTES LES 5 MIN
