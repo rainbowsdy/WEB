@@ -20,7 +20,7 @@ app.get("/nb_total", async (req, res) => {
   const result = await pool.query(`
   SELECT ns.nom,nv.num_station,nv.velo_normal + nv.velo_elec AS total_velos
   FROM nb_velos nv
-  JOIN nom_stations ns ON nv.num_station = ns.id_station
+  JOIN info_station ns ON nv.num_station = ns.id_station
   WHERE nv.horodatage = (
     SELECT MAX(horodatage)
     FROM nb_velos nv2
@@ -33,7 +33,7 @@ app.get("/nb_elec", async (req, res) => {
   const result = await pool.query(`
   SELECT ns.nom, nv.num_station, nv.velo_elec
 FROM nb_velos nv
-JOIN nom_stations ns ON nv.num_station = ns.id_station
+JOIN info_station ns ON nv.num_station = ns.id_station
 WHERE nv.horodatage = (
   SELECT MAX(horodatage)
   FROM nb_velos nv2
@@ -50,7 +50,7 @@ app.get("/nb_normal", async (req, res) => {
     let query = `
       SELECT ns.nom, nv.num_station, nv.velo_normal
       FROM nb_velos nv
-      JOIN nom_stations ns ON nv.num_station = ns.id_station
+      JOIN info_station ns ON nv.num_station = ns.id_station
       WHERE nv.horodatage = (
         SELECT MAX(horodatage)
         FROM nb_velos nv2
@@ -75,6 +75,14 @@ app.get("/nb_normal", async (req, res) => {
   }
 });
 
+app.get("/info_statique", async (req, res) => {
+  const result = await pool.query(`
+  SELECT *
+  FROM info_station
+  ORDER BY id_station ASC;`);
+  res.json(result.rows);
+});
+
 app.get("/stations/:id/:type", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -91,9 +99,9 @@ app.get("/stations/:id/:type", async (req, res) => {
       SELECT 
         ns.nom,nv.num_station,nv.horodatage,nv.velo_normal, ${column} AS valeur
       FROM nb_velos nv
-      JOIN nom_stations ns ON nv.num_station = ns.id_station
+      JOIN infos_station ns ON nv.num_station = ns.id_station
       WHERE nv.num_station = $1
-      LIMIT 500
+      LIMIT 1000
     `;
 
     const values = [id];
