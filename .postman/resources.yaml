@@ -1,0 +1,6 @@
+# Use this workspace to collaborate
+workspace:
+  id: e07da4a6-d74b-4c36-8bc6-05b969adef8b
+localResources:
+  specs:
+    - ../everything_is_a_gamble/API/api.yaml
