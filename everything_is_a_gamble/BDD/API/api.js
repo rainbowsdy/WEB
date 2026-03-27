@@ -99,7 +99,7 @@ app.get("/stations/:id/:type", async (req, res) => {
       SELECT 
         ns.nom,nv.num_station,nv.horodatage,nv.velo_normal, ${column} AS valeur
       FROM nb_velos nv
-      JOIN infos_station ns ON nv.num_station = ns.id_station
+      JOIN info_station ns ON nv.num_station = ns.id_station
       WHERE nv.num_station = $1
       LIMIT 1000
     `;
