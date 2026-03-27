@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Dice1, Bike, Cloud, TrendingUp, Users, Zap } from 'lucide-react';
 import { BetCard } from './components/BetCard';
-import { Header } from './components/Header';
+import  Header  from './components/Header';
 
 export default function App() {
   const [balance] = useState(1000);
