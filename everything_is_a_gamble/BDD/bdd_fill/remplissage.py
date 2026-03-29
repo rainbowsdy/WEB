@@ -40,16 +40,19 @@ def init_stations():
         name = station["name"]
         if name == "":
             name=station_id
+        latitude = station["lat"]
+        longitude =  station["lon"]
+        capacite =  station["capacity"]
 
         try:
             cursor.execute("""
-                INSERT INTO nom_stations (nom, id_station)
-                VALUES (%s, %s)
-                ON CONFLICT (id_station) DO UPDATE SET nom = EXCLUDED.nom;
-            """, (name, station_id))
+                INSERT INTO info_station (nom, id_station,lat,lon,capacity)
+                VALUES (%s, %s, %s, %s, %s)
+                ON CONFLICT (id_station) DO  UPDATE SET nom = EXCLUDED.nom;
+            """, (name, station_id,latitude,longitude,capacite))
         except Exception as e:
             print("Erreur insertion status:", e)
-            conn.rollback()  # important pour “débloquer” la transaction
+            conn.rollback()
         else:
             conn.commit()
 
