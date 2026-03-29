@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
+const bcrypt = require("bcrypt");
 // pour lancer la bdd sur mon ordi
 // sudo -u postgres psql
 // \c velov
@@ -14,6 +15,76 @@ const pool = new Pool({
   database: "velov",
   password: "moi123",
   port: 5432,
+});
+
+
+
+app.post("/register", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    // hash du mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const result = await pool.query(
+      "INSERT INTO users (username, password,money) VALUES ($1, $2,1000) RETURNING user_id, username",
+      [username, hashedPassword]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+
+
+app.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const result = await pool.query(
+      "SELECT * FROM users WHERE username = $1",
+      [username]
+    );
+
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(401).json({ error: "Utilisateur inconnu" });
+    }
+
+    // vérifier le mot de passe
+    const valid = await bcrypt.compare(password, user.password);
+
+    if (!valid) {
+      return res.status(401).json({ error: "Mot de passe incorrect" });
+    }
+
+    res.json({ money: user.money, username: user.username });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erreur serveur" });;
+  }
+});
+
+app.post("/update_money", async (req, res) => {
+  try {
+    const { username, money } = req.body;
+
+    const result = await pool.query(
+      "UPDATE users SET money = $1 WHERE username = $2 RETURNING money",
+      [money, username]
+    );
+
+    res.json({ money: result.rows[0].money });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erreur serveur" });;
+  }
 });
 
 app.get("/nb_total", async (req, res) => {
@@ -71,7 +142,7 @@ app.get("/nb_normal", async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error(err);
-    res.status(500).send("Erreur serveur");
+    res.status(500).json({ error: "Erreur serveur" });;
   }
 });
 
@@ -119,7 +190,7 @@ app.get("/stations/:id/:type", async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.status(500).send("Erreur serveur");
+    res.status(500).json({ error: "Erreur serveur" });;
   }
 });
 

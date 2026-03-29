@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 
-export default function AuthPage() {
+interface AuthPageProps {
+  onLogin?: (username: string) => void;
+}
+
+export default function AuthPage({ onLogin }: AuthPageProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e:any) => {
     e.preventDefault();
 
     const endpoint = isLogin ? "/login" : "/register";
@@ -28,14 +32,21 @@ export default function AuthPage() {
 
       setMessage(isLogin ? "Connexion réussie" : "Compte créé");
       console.log("Réponse API:", data);
-    } catch (err) {
+      
+      if (isLogin && onLogin) {
+        onLogin(username);
+      }
+      
+      setUsername("");
+      setPassword("");
+    } catch (err: any) {
       console.error("Erreur:", err);
       setMessage(err.message);
     }
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", marginTop: 100 }}>
+    <div style={{ display: "flex", justifyContent: "center" }}>
       <form onSubmit={handleSubmit} style={{ width: 300 }}>
         <h2>{isLogin ? "Connexion" : "Créer un compte"}</h2>
 

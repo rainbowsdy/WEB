@@ -11,19 +11,63 @@ interface BetCardProps {
     currentValue: string;
     odds: Record<string, number | undefined>;
   };
+  balance: number;
+  user: string | null;
+  onBetPlaced: (newBalance: number) => void;
 }
 
-export function BetCard({ bet }: BetCardProps) {
+export function BetCard({ bet, balance, user, onBetPlaced }: BetCardProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [amount, setAmount] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const Icon = bet.icon;
 
-  const handlePlaceBet = () => {
-    if (selectedOption && amount) {
-      alert(`Paris placé !\n${selectedOption}: ${amount}€\nCote: ${bet.odds[selectedOption]}x`);
+  const handlePlaceBet = async () => {
+    if (!selectedOption || !amount || !user) {
+      setError("Veuillez sélectionner une option et un montant");
+      return;
+    }
+
+    const betAmount = parseFloat(amount);
+    
+    if (betAmount <= 0) {
+      setError("Le montant doit être supérieur à 0");
+      return;
+    }
+
+    if (betAmount > balance) {
+      setError("Solde insuffisant");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const newBalance = balance - betAmount;
+      const res = await fetch(`https://inculcative-shenita-watchfully.ngrok-free.dev/update_money`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username: user, money: newBalance }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Erreur lors de la mise à jour du solde");
+      }
+
+      const gainPotentiel = (betAmount * (bet.odds[selectedOption] || 1)).toFixed(2);
+      alert(`Paris placé !\n${selectedOption}: ${betAmount}€\nCote: ${bet.odds[selectedOption]}x\nGain potentiel: ${gainPotentiel}€`);
+      onBetPlaced(newBalance);
       setSelectedOption(null);
       setAmount('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Une erreur s'est produite");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,18 +128,22 @@ export function BetCard({ bet }: BetCardProps) {
             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
 
+          {error && (
+            <p className="text-xs text-center text-red-400">{error}</p>
+          )}
+
           <button
             onClick={handlePlaceBet}
-            disabled={!amount}
+            disabled={!amount || loading || !user}
             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-500 disabled:to-gray-600 text-white py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <Clock className="w-4 h-4" />
-            Placer le pari
+            {loading ? "Traitement..." : "Placer le pari"}
           </button>
 
-          {amount && (
+          {amount && selectedOption && (
             <p className="text-xs text-center text-white/60">
-              Gain potentiel: {0/*(parseFloat(amount) * bet.odds[selectedOption]).toFixed(2)*/}€
+              Gain potentiel: {(parseFloat(amount) * (bet.odds[selectedOption] || 1)).toFixed(2)}€
             </p>
           )}
         </div>

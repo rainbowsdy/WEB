@@ -4,7 +4,12 @@ import { BetCard } from './components/BetCard';
 import  Header  from './components/Header';
 
 export default function App() {
-  const [balance] = useState(1000);
+  const [balance, setBalance] = useState(1000);
+  const [user, setUser] = useState<string | null>(null);
+
+  const handleLogin = (username: string) => {
+    setUser(username);
+  };
 
   const bets = [
     {
@@ -89,7 +94,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <Header balance={balance} />
+      <Header balance={balance} user={user} onLogin={handleLogin} onLogout={() => setUser(null)} />
 
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
@@ -110,7 +115,13 @@ export default function App() {
         {/* Bets Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {bets.map((bet) => (
-            <BetCard key={bet.id} bet={bet} />
+            <BetCard 
+              key={bet.id} 
+              bet={bet} 
+              balance={balance}
+              user={user}
+              onBetPlaced={setBalance}
+            />
           ))}
         </div>
 
