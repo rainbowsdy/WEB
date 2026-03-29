@@ -1,0 +1,119 @@
+openapi: 3.0.3
+info:
+  title: Velov API
+  description: |
+    API permettant de récupérer le nombre de vélos disponibles par station.
+
+    Les données sont issues d'une base PostgreSQL avec les tables :
+    - nb_velos
+    - nom_stations
+
+    Chaque endpoint retourne les données les plus récentes (dernier horodatage).
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3001
+    description: Serveur local  
+    
+  - url: https://inculcative-shenita-watchfully.ngrok-free.dev
+    description: Serveur local
+
+paths:
+  /nb_total:
+    get:
+      summary: Nombre total de vélos par station
+      description: |
+        Retourne le nombre total de vélos (électriques + normaux)
+        pour chaque station, basé sur le dernier horodatage disponible.
+      responses:
+        '200':
+          description: Liste des stations avec le total de vélos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TotalVelos'
+
+  /nb_elec:
+    get:
+      summary: Nombre de vélos électriques par station
+      description: |
+        Retourne le nombre de vélos électriques
+        pour chaque station (dernier état connu).
+      responses:
+        '200':
+          description: Liste des stations avec vélos électriques
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VeloElec'
+
+  /nb_normal:
+    get:
+      summary: Nombre de vélos normaux par station
+      description: |
+        Retourne le nombre de vélos classiques (non électriques)
+        pour chaque station (dernier état connu).
+      responses:
+        '200':
+          description: Liste des stations avec vélos normaux
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VeloNormal'
+
+components:
+  schemas:
+
+    TotalVelos:
+      type: object
+      properties:
+        nom:
+          type: string
+          description: Nom de la station
+          example: "République"
+        num_station:
+          type: integer
+          description: Identifiant de la station
+          example: 1234
+        total_velos:
+          type: integer
+          description: Nombre total de vélos disponibles
+          example: 15
+
+    VeloElec:
+      type: object
+      properties:
+        nom:
+          type: string
+          description: Nom de la station
+          example: "Bellecour"
+        num_station:
+          type: integer
+          description: Identifiant de la station
+          example: 5678
+        velo_elec:
+          type: integer
+          description: Nombre de vélos électriques disponibles
+          example: 5
+
+    VeloNormal:
+      type: object
+      properties:
+        nom:
+          type: string
+          description: Nom de la station
+          example: "Part-Dieu"
+        num_station:
+          type: integer
+          description: Identifiant de la station
+          example: 9101
+        velo_normal:
+          type: integer
+          description: Nombre de vélos classiques disponibles
+          example: 10
