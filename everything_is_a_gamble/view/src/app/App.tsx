@@ -8,12 +8,17 @@ type Station = {
   num_station: number;
   total_velos: number;
 };
+type Utilisateur = {
+  username: string;
+  money: number;
+}
  const base_url = "https://inculcative-shenita-watchfully.ngrok-free.dev";
 // const base_url = "http://localhost:3001";
 
 export default function App() {
   const [balance] = useState(1000);
-  const [stations, setStations] = useState<Station[]>([]);
+  const [stations, setStations] = useState<Station[]>([]); 
+   const [utilisateur, setUtilisateur] = useState<Utilisateur>({username: "",money:0});
 
 
   useEffect(() => {
