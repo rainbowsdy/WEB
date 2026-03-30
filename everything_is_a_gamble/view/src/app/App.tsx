@@ -1,10 +1,47 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dice1, Bike, Cloud, TrendingUp, Users, Zap } from 'lucide-react';
 import { BetCard } from './components/BetCard';
 import  Header  from './components/Header';
 
+type Station = {
+  nom: string;
+  num_station: number;
+  total_velos: number;
+};
+
 export default function App() {
   const [balance] = useState(1000);
+  const [stations, setStations] = useState<Station[]>([]);
+
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const res = await fetch(
+        "https://inculcative-shenita-watchfully.ngrok-free.dev/nb_total",
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
+      );
+
+      const data = await res.json();
+      setStations(data);
+    } catch (error) {
+      console.error("Erreur lors du fetch :", error);
+    }
+  };
+
+  fetchData();
+}, []);
+
+  const AVENUE_DES_ARTS = stations.find((s) =>
+    s.num_station === 10084
+  );
+
+  console.log("STATIONS:", stations);
+  console.log("AVENUE:", AVENUE_DES_ARTS);
 
   const bets = [
     {
@@ -13,7 +50,9 @@ export default function App() {
       description: "Combien de vélos seront disponibles à la station Bellecour dans 1h ?",
       icon: Bike,
       category: "Transport",
-      currentValue: "12 vélos",
+      currentValue: AVENUE_DES_ARTS
+        ? `${AVENUE_DES_ARTS.total_velos} vélos`
+        : "Chargement...",
       odds: {
         over15: 2.5,
         under10: 1.8,
@@ -86,6 +125,7 @@ export default function App() {
       }
     }
   ];
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
