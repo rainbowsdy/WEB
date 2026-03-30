@@ -6,7 +6,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const endpoint = isLogin ? "/login" : "/register";
@@ -30,7 +30,12 @@ export default function AuthPage() {
       console.log("Réponse API:", data);
     } catch (err) {
       console.error("Erreur:", err);
-      setMessage(err.message);
+
+      if (err instanceof Error) {
+        setMessage(err.message);
+      } else {
+        setMessage("Une erreur inconnue est survenue");
+      }
     }
   };
 

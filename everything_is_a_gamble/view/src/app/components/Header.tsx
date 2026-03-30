@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Wallet, Trophy, Menu } from 'lucide-react';
-import AuthPage from './AuthPage'; // ⚠️ corrige l'import en utilisant default export
+import AuthPage from './AuthPage'; //  corrige l'import en utilisant default export
 
 interface HeaderProps {
   balance: number;
@@ -18,7 +18,7 @@ export default function Header({ balance }: HeaderProps) {
               <Trophy className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-white">Everything is a Gamble</h2>
+              <h2 className="text-white">Velo'v Gamble</h2>
               <p className="text-xs text-white/60">Projet École</p>
             </div>
           </div>

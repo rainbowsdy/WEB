@@ -1,0 +1,175 @@
+{
+  "uuid": "80bacf88-3309-45a6-ad9b-dac61742cbf1",
+  "lastMigration": 33,
+  "name": "Velov API",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3001,
+  "hostname": "",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "86b91118-7454-4854-bd95-1b99238a8156",
+      "type": "http",
+      "documentation": "Nombre total de vélos par station",
+      "method": "get",
+      "endpoint": "nb_total",
+      "responses": [
+        {
+          "uuid": "ade464b6-9fff-405a-8b65-95c50b53a7e3",
+          "body": "[\n  {\n    \"nom\": \"République\",\n    \"num_station\": 1234,\n    \"total_velos\": 15\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Liste des stations avec le total de vélos",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "5e92d1d3-fe18-47fa-9d9c-4ff42806e154",
+      "type": "http",
+      "documentation": "Nombre de vélos électriques par station",
+      "method": "get",
+      "endpoint": "nb_elec",
+      "responses": [
+        {
+          "uuid": "a23d1d53-85ba-4d02-88af-cb1966c3d023",
+          "body": "[\n  {\n    \"nom\": \"Bellecour\",\n    \"num_station\": 5678,\n    \"velo_elec\": 5\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Liste des stations avec vélos électriques",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "2fe16cd4-3d31-43ca-9d76-8ab539cc0779",
+      "type": "http",
+      "documentation": "Nombre de vélos normaux par station",
+      "method": "get",
+      "endpoint": "nb_normal",
+      "responses": [
+        {
+          "uuid": "3606184a-e170-422f-975c-f1510806ca89",
+          "body": "[\n  {\n    \"nom\": \"Part-Dieu\",\n    \"num_station\": 9101,\n    \"velo_normal\": 10\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Liste des stations avec vélos normaux",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "86b91118-7454-4854-bd95-1b99238a8156"
+    },
+    {
+      "type": "route",
+      "uuid": "5e92d1d3-fe18-47fa-9d9c-4ff42806e154"
+    },
+    {
+      "type": "route",
+      "uuid": "2fe16cd4-3d31-43ca-9d76-8ab539cc0779"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}
