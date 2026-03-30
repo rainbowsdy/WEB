@@ -5,7 +5,7 @@ import AuthPage from './AuthPage';
 interface HeaderProps {
   balance: number;
   user: string | null;
-  onLogin: (username: string) => void;
+  onLogin: (username: string, balance: number) => void;
   onLogout: () => void;
 }
 
@@ -60,7 +60,7 @@ export default function Header({ balance, user, onLogin, onLogout }: HeaderProps
       {showAuth && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-xl w-[350px]">
-            <AuthPage onLogin={(username) => { onLogin(username); setShowAuth(false); }} />
+            <AuthPage onLogin={(username, balance) => { onLogin(username, balance); setShowAuth(false); }} />
             <button
               onClick={() => setShowAuth(false)}
               className="mt-4 w-full bg-gray-200 py-2 rounded-lg"

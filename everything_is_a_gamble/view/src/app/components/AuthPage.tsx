@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 interface AuthPageProps {
-  onLogin?: (username: string) => void;
+  onLogin?: (username: string, balance: number) => void;
 }
 
 export default function AuthPage({ onLogin }: AuthPageProps) {
@@ -34,7 +34,7 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
       console.log("Réponse API:", data);
       
       if (isLogin && onLogin) {
-        onLogin(username);
+        onLogin(username, data.money);
       }
       
       setUsername("");

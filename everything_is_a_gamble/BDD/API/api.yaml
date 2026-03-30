@@ -1,24 +1,182 @@
 openapi: 3.0.3
 info:
-  title: Velov API
+  title: Everything is a Gamble API
   description: |
-    API permettant de récupérer le nombre de vélos disponibles par station.
+    API pour l'application de paris sur les données en temps réel.
 
-    Les données sont issues d'une base PostgreSQL avec les tables :
-    - nb_velos
-    - nom_stations
+    Fonctionnalités :
+    - Authentification utilisateur (register/login)
+    - Gestion du solde utilisateur
+    - Données vélos Velov Lyon (total, électriques, normaux)
+    - Informations statiques des stations
+    - Historique des données par station
 
-    Chaque endpoint retourne les données les plus récentes (dernier horodatage).
+    Base de données PostgreSQL avec les tables :
+    - users (authentification et solde)
+    - nb_velos (données vélos par station et horodatage)
+    - info_station (informations statiques des stations)
   version: 1.0.0
 
 servers:
   - url: http://localhost:3001
-    description: Serveur local  
-    
-  - url: https://inculcative-shenita-watchfully.ngrok-free.dev
     description: Serveur local
+  - url: https://inculcative-shenita-watchfully.ngrok-free.dev
+    description: Serveur de production (ngrok)
 
 paths:
+  /register:
+    post:
+      summary: Inscription d'un nouvel utilisateur
+      description: Crée un nouveau compte utilisateur avec un solde initial de 1000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: Nom d'utilisateur unique
+                  example: "john_doe"
+                password:
+                  type: string
+                  description: Mot de passe (sera hashé)
+                  example: "password123"
+      responses:
+        '200':
+          description: Compte créé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                    description: ID unique de l'utilisateur
+                    example: 1
+                  username:
+                    type: string
+                    description: Nom d'utilisateur
+                    example: "john_doe"
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Erreur serveur"
+
+  /login:
+    post:
+      summary: Connexion utilisateur
+      description: Authentifie un utilisateur et retourne ses informations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: Nom d'utilisateur
+                  example: "john_doe"
+                password:
+                  type: string
+                  description: Mot de passe
+                  example: "password123"
+      responses:
+        '200':
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  money:
+                    type: number
+                    description: Solde de l'utilisateur
+                    example: 1000
+                  username:
+                    type: string
+                    description: Nom d'utilisateur
+                    example: "john_doe"
+        '401':
+          description: Authentification échouée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Utilisateur inconnu"
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Erreur serveur"
+
+  /update_money:
+    post:
+      summary: Mise à jour du solde utilisateur
+      description: Met à jour le solde d'un utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - money
+              properties:
+                username:
+                  type: string
+                  description: Nom d'utilisateur
+                  example: "john_doe"
+                money:
+                  type: number
+                  description: Nouveau solde
+                  example: 950
+      responses:
+        '200':
+          description: Solde mis à jour
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  money:
+                    type: number
+                    description: Nouveau solde
+                    example: 950
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Erreur serveur"
+
   /nb_total:
     get:
       summary: Nombre total de vélos par station
@@ -57,6 +215,14 @@ paths:
       description: |
         Retourne le nombre de vélos classiques (non électriques)
         pour chaque station (dernier état connu).
+      parameters:
+        - name: num_station
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Numéro de station spécifique (optionnel)
+          example: 1234
       responses:
         '200':
           description: Liste des stations avec vélos normaux
@@ -67,9 +233,72 @@ paths:
                 items:
                   $ref: '#/components/schemas/VeloNormal'
 
+  /info_statique:
+    get:
+      summary: Informations statiques des stations
+      description: Retourne toutes les informations statiques des stations Velov
+      responses:
+        '200':
+          description: Liste des informations statiques des stations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StationInfo'
+
+  /stations/{id}/{type}:
+    get:
+      summary: Historique des données d'une station
+      description: |
+        Retourne l'historique des données pour une station spécifique.
+        Type peut être 'normal', 'elec' ou 'total'.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Numéro de la station
+          example: 1234
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [normal, elec, total]
+          description: Type de vélos (normal, elec, total)
+          example: "total"
+      responses:
+        '200':
+          description: Historique des données de la station
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StationHistory'
+        '400':
+          description: Type invalide
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "type inconnu,\\n (types valides: 'normal','elec','total')"
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Erreur serveur"
+
 components:
   schemas:
-
     TotalVelos:
       type: object
       properties:
@@ -117,3 +346,52 @@ components:
           type: integer
           description: Nombre de vélos classiques disponibles
           example: 10
+
+    StationInfo:
+      type: object
+      description: Informations statiques d'une station
+      properties:
+        id_station:
+          type: integer
+          description: ID de la station
+          example: 1234
+        nom:
+          type: string
+          description: Nom de la station
+          example: "Bellecour"
+        # Autres propriétés selon la structure de la table info_station
+      additionalProperties: true
+
+    StationHistory:
+      type: object
+      properties:
+        nom:
+          type: string
+          description: Nom de la station
+          example: "Bellecour"
+        num_station:
+          type: integer
+          description: ID de la station
+          example: 1234
+        historique:
+          type: array
+          items:
+            type: object
+            properties:
+              horodatage:
+                type: string
+                format: date-time
+                description: Date et heure de la mesure
+                example: "2024-01-15T10:30:00Z"
+              velo_normal:
+                type: integer
+                description: Nombre de vélos normaux (si type=normal)
+                example: 8
+              velo_elec:
+                type: integer
+                description: Nombre de vélos électriques (si type=elec)
+                example: 5
+              velo_total:
+                type: integer
+                description: Nombre total de vélos (si type=total)
+                example: 13
