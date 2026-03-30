@@ -38,12 +38,8 @@ export default function App() {
     fetchData();
   }, []);
 
-  const AVENUE_DES_ARTS = stations.find((s) =>
-    s.num_station === 10084
-  );
 
   console.log("STATIONS:", stations);
-  console.log("AVENUE:", AVENUE_DES_ARTS);
   const bets = stations.map((station)=>(
     {
       id: station.num_station,
