@@ -8,8 +8,8 @@ type Station = {
   num_station: number;
   total_velos: number;
 };
-// const base_url = "https://inculcative-shenita-watchfully.ngrok-free.dev";
-const base_url = "http://localhost:3001";
+ const base_url = "https://inculcative-shenita-watchfully.ngrok-free.dev";
+// const base_url = "http://localhost:3001";
 
 export default function App() {
   const [balance] = useState(1000);
@@ -44,25 +44,21 @@ export default function App() {
 
   console.log("STATIONS:", stations);
   console.log("AVENUE:", AVENUE_DES_ARTS);
-
-  const bets = [
+  const bets = stations.map((station)=>(
     {
-      id: 1,
-      title: "VeloV: ",
+      id: station.num_station,
+      title: `VeloV: ${station.nom}`,
       description: "Il y a t-il plus ou moins de Velov actuellement?",
       icon: Bike,
       category: "Transport",
-      currentValue: AVENUE_DES_ARTS
-        ? `${AVENUE_DES_ARTS.total_velos} vélos`
-        : "Chargement...",
+      currentValue: `${station.total_velos} vélos`,
       odds: {
         Plus: 2.0,
         Moins: 2.0,
         Exactement: 5.0
       }
-    },
-
-  ];
+    }
+  ))
 
 
   return (
