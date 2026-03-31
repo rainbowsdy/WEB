@@ -12,13 +12,12 @@ type Utilisateur = {
   username: string;
   money: number;
 }
- const base_url = "https://inculcative-shenita-watchfully.ngrok-free.dev";
+const base_url = "https://inculcative-shenita-watchfully.ngrok-free.dev";
 // const base_url = "http://localhost:3001";
 
 export default function App() {
-  const [balance] = useState(1000);
-  const [stations, setStations] = useState<Station[]>([]); 
-   const [utilisateur, setUtilisateur] = useState<Utilisateur>({username: "",money:0});
+  const [stations, setStations] = useState<Station[]>([]);
+  const [utilisateur, setUtilisateur] = useState<Utilisateur>({ username: "", money: 0 });
 
 
   useEffect(() => {
@@ -45,7 +44,7 @@ export default function App() {
 
 
   console.log("STATIONS:", stations);
-  const bets = stations.map((station)=>(
+  const bets = stations.map((station) => (
     {
       id: station.num_station,
       title: `VeloV: ${station.nom}`,
@@ -64,7 +63,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <Header balance={balance} />
+      <Header utilisateur={utilisateur} />
 
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
@@ -75,7 +74,7 @@ export default function App() {
           </div>
 
           <h1 className="text-6xl mb-4 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
-            Velo'v Gamble  
+            Velo'v Gamble
           </h1>
           <p className="text-xl text-white/80 max-w-2xl mx-auto">
             Pariez sur l'imprévisible : Les Vélo'vs de Lyon
