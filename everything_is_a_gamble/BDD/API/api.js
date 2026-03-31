@@ -142,7 +142,7 @@ app.get("/nb_normal", async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Erreur serveur" });;
+    res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
@@ -152,6 +152,22 @@ app.get("/info_statique", async (req, res) => {
   FROM info_station
   ORDER BY id_station ASC;`);
   res.json(result.rows);
+});
+
+app.get("/moyennes", async (req, res) => {
+  try {
+  const result = await pool.query(`
+  SELECT ns.nom, nv.num_station, ROUND(AVG(nv.velo_normal) + AVG(nv.velo_elec), 2) AS moyenne_velos
+  FROM nb_velos nv
+  JOIN info_station ns ON nv.num_station = ns.id_station
+  GROUP BY ns.nom, nv.num_station
+  ORDER BY nv.num_station ASC
+  LIMIT 864;`);
+  res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
 });
 
 app.get("/stations/:id/:type", async (req, res) => {
@@ -172,7 +188,7 @@ app.get("/stations/:id/:type", async (req, res) => {
       FROM nb_velos nv
       JOIN info_station ns ON nv.num_station = ns.id_station
       WHERE nv.num_station = $1
-      LIMIT 1000
+      LIMIT 864
     `;
 
     const values = [id];
