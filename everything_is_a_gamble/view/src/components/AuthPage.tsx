@@ -1,48 +1,56 @@
 import React, { useState } from "react";
+import { login, register, Utilisateur } from "../api";
 
-export default function AuthPage() {
+type AuthPageProps = {
+  setUtilisateur: (u: Utilisateur) => void
+}
+
+export function AuthPage({ setUtilisateur }: AuthPageProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  // Fonction helper pour mettre à jour l'utilisateur après authentification
+  const handleAuthSuccess = (data: { username?: string; money?: number } | undefined) => {
+    if (data && data.username && data.money !== undefined) {
+      setUtilisateur({
+        username: data.username,
+        money: data.money
+      });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const endpoint = isLogin ? "/login" : "/register";
-
     try {
-      const res = await fetch(`https://inculcative-shenita-watchfully.ngrok-free.dev${endpoint}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Erreur");
+      if (isLogin) {
+        // Connexion
+        const data = await login(username, password);
+        setMessage("Connexion réussie");
+        handleAuthSuccess(data);
+      } else {
+        // Inscription
+        await register(username, password);
+        setMessage("Compte créé avec succès");
+        // Après inscription, connecter automatiquement
+        const loginData = await login(username, password);
+        handleAuthSuccess(loginData);
       }
-
-      setMessage(isLogin ? "Connexion réussie" : "Compte créé");
-      console.log("Réponse API:", data);
+      console.log("Authentification réussie");
     } catch (err) {
       console.error("Erreur:", err);
-
-      if (err instanceof Error) {
-        setMessage(err.message);
-      } else {
-        setMessage("Une erreur inconnue est survenue");
-      }
+      setMessage(err instanceof Error ? err.message : "Une erreur est survenue");
     }
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", marginTop: 100 }}>
-      <form onSubmit={handleSubmit} style={{ width: 300 }}>
-        <h2>{isLogin ? "Connexion" : "Créer un compte"}</h2>
+    <div className="flex justify-center mt-24">
+      <form onSubmit={handleSubmit} className="w-[300px]">
+        <h2 className="text-xl font-bold mb-4 text-gray-800">
+          {isLogin ? "Connexion" : "Créer un compte"}
+        </h2>
 
         <input
           type="text"
@@ -50,7 +58,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
-          style={{ width: "100%", marginBottom: 10 }}
+          className="w-full mb-3 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
 
         <input
@@ -59,17 +67,20 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          style={{ width: "100%", marginBottom: 10 }}
+          className="w-full mb-3 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
 
-        <button type="submit" style={{ width: "100%" }}>
+        <button
+          type="submit"
+          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white py-2 rounded-lg transition-all"
+        >
           {isLogin ? "Se connecter" : "Créer un compte"}
         </button>
 
         <button
           type="button"
           onClick={() => setIsLogin(!isLogin)}
-          style={{ width: "100%", marginTop: 10 }}
+          className="w-full mt-3 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg transition-colors"
         >
           {isLogin
             ? "Créer un compte"
@@ -77,7 +88,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         </button>
 
         {message && (
-          <p style={{ marginTop: 10 }}>
+          <p className={`mt-3 text-center ${message.includes('réussie') || message.includes('succès') ? 'text-green-600' : 'text-red-600'}`}>
             {message}
           </p>
         )}

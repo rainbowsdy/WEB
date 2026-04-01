@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LucideIcon, TrendingUp, Clock, Tag } from 'lucide-react';
+import { Utilisateur, updateMoney } from '../api';
 
 interface BetCardProps {
   bet: {
@@ -11,19 +12,71 @@ interface BetCardProps {
     currentValue: string;
     odds: Record<string, number | undefined>;
   };
+  utilisateur: Utilisateur;
+  onBetPlaced: (newMoney: number) => void;
 }
 
-export function BetCard({ bet }: BetCardProps) {
+export function BetCard({ bet, utilisateur, onBetPlaced }: BetCardProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [amount, setAmount] = useState<string>('');
 
   const Icon = bet.icon;
 
-  const handlePlaceBet = () => {
-    if (selectedOption && amount) {
-      alert(`Paris placé !\n${selectedOption}: ${amount}€\nCote: ${bet.odds[selectedOption]}x`);
+  const handlePlaceBet = async () => {
+    const numAmount = parseFloat(amount);
+    
+    // Validation du montant
+    if (!selectedOption || !amount) {
+      return;
+    }
+    
+    if (isNaN(numAmount) || numAmount <= 0) {
+      alert('Veuillez entrer un montant valide supérieur à 0€');
+      return;
+    }
+    
+    if (numAmount < 1) {
+      alert('Le montant minimum est de 1€');
+      return;
+    }
+
+    // Vérification que l'utilisateur est connecté
+    if (!utilisateur.username) {
+      alert('Vous devez être connecté pour placer un pari');
+      return;
+    }
+
+    // Vérification du solde suffisant
+    const currentMoney = utilisateur.money ?? 0;
+    if (currentMoney < numAmount) {
+      alert(`Solde insuffisant ! Vous avez ${currentMoney.toFixed(2)}€ mais vous essayez de parier ${numAmount.toFixed(2)}€`);
+      return;
+    }
+    
+    try {
+      // Déduction du montant du solde
+      const newMoney = currentMoney - numAmount;
+      
+      // Mise à jour du solde dans la base de données
+      await updateMoney(utilisateur.username, newMoney);
+      
+      // Mise à jour de l'état local
+      onBetPlaced(newMoney);
+      
+      const potentialWin = numAmount * (bet.odds[selectedOption] || 0);
+      alert(
+        `Pari placé avec succès !\n\n` +
+        `Option: ${selectedOption}\n` +
+        `Mise: ${numAmount.toFixed(2)}€\n` +
+        `Cote: ${bet.odds[selectedOption]}x\n` +
+        `Gain potentiel: ${potentialWin.toFixed(2)}€\n` +
+        `Nouveau solde: ${newMoney.toFixed(2)}€`
+      );
+      
       setSelectedOption(null);
       setAmount('');
+    } catch (error) {
+      alert(`Erreur lors du placement du pari: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
@@ -95,7 +148,7 @@ export function BetCard({ bet }: BetCardProps) {
 
           {amount && (
             <p className="text-xs text-center text-white/60">
-              Gain potentiel: {0/*(parseFloat(amount) * bet.odds[selectedOption]).toFixed(2)*/}€
+              Gain potentiel: {(parseFloat(amount) * (bet.odds[selectedOption] || 0)).toFixed(2)}€
             </p>
           )}
         </div>

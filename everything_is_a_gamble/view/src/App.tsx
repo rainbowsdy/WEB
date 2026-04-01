@@ -1,52 +1,34 @@
 import { useEffect, useState } from 'react';
-import { Dice1, Bike, Cloud, TrendingUp, Users, Zap } from 'lucide-react';
+import { Dice1, Bike } from 'lucide-react';
 import { BetCard } from './components/BetCard';
-import Header from './components/Header';
-
-type Station = {
-  nom: string;
-  num_station: number;
-  total_velos: number;
-};
-type Utilisateur = {
-  username: string;
-  money: number;
-}
-const base_url = "https://inculcative-shenita-watchfully.ngrok-free.dev";
-// const base_url = "http://localhost:3001";
+import { Header } from './components/Header';
+import { getTotalVelos, Utilisateur, Station } from './api';
 
 export default function App() {
   const [stations, setStations] = useState<Station[]>([]);
   const [utilisateur, setUtilisateur] = useState<Utilisateur>({ username: "", money: 0 });
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(
-          `${base_url}/nb_total`,
-          {
-            headers: {
-              "ngrok-skip-browser-warning": "true",
-            },
-          }
-        );
-
-        const data = await res.json();
-        setStations(data);
+        const data = await getTotalVelos();
+        setStations(data || []);
       } catch (error) {
         console.error("Erreur lors du fetch :", error);
+        setError(error instanceof Error ? error.message : 'Erreur de chargement');
+      } finally {
+        setLoading(false);
       }
     };
-
     fetchData();
   }, []);
-
-
-  console.log("STATIONS:", stations);
-  const bets = stations.map((station) => (
-    {
-      id: station.num_station,
+  
+  const bets = stations
+    .filter(station => station.nom && station.num_station && station.total_velos !== undefined)
+    .map((station) => ({
+      id: station.num_station!,
       title: `VeloV: ${station.nom}`,
       description: "Il y a t-il plus ou moins de Velov actuellement?",
       icon: Bike,
@@ -57,14 +39,15 @@ export default function App() {
         Moins: 2.0,
         Exactement: 5.0
       }
-    }
-  ))
+    }));
 
+  const handleBetPlaced = (newMoney: number) => {
+    setUtilisateur({ ...utilisateur, money: newMoney });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <Header utilisateur={utilisateur} />
-
+      <Header utilisateur={utilisateur} setUtilisateur={setUtilisateur} />
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
@@ -82,11 +65,26 @@ export default function App() {
         </div>
 
         {/* Bets Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {bets.map((bet) => (
-            <BetCard key={bet.id} bet={bet} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center text-white">
+            <p className="text-xl">Chargement des stations...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center text-red-400">
+            <p className="text-xl">Erreur : {error}</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {bets.map((bet) => (
+              <BetCard
+                key={bet.id}
+                bet={bet}
+                utilisateur={utilisateur}
+                onBetPlaced={handleBetPlaced}
+              />
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
