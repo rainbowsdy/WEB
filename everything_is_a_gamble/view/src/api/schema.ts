@@ -377,7 +377,9 @@ export interface paths {
         };
         /**
          * Informations statiques des stations
-         * @description Retourne toutes les informations statiques des stations Velov
+         * @description Retourne toutes les colonnes de la table `info_station` (équivalent `SELECT *`),
+         *     dont notamment le nom, l'identifiant, la capacité et les **coordonnées GPS**
+         *     (latitude / longitude au format WGS84, comme dans les données JCDecaux).
          */
         get: {
             parameters: {
@@ -608,10 +610,13 @@ export interface components {
              */
             moyenne_velos?: number;
         };
-        /** @description Informations statiques d'une station */
+        /**
+         * @description Ligne de la table `info_station` (schéma aligné sur le remplissage depuis
+         *     l'API station_information JCDecaux).
+         */
         StationInfo: {
             /**
-             * @description ID de la station
+             * @description ID de la station (clé métier)
              * @example 1234
              */
             id_station?: number;
@@ -620,6 +625,23 @@ export interface components {
              * @example Bellecour
              */
             nom?: string;
+            /**
+             * Format: double
+             * @description Latitude (WGS84), en degrés décimaux
+             * @example 45.7602
+             */
+            lat?: number;
+            /**
+             * Format: double
+             * @description Longitude (WGS84), en degrés décimaux
+             * @example 4.8357
+             */
+            lon?: number;
+            /**
+             * @description Capacité d'emplacements (vélos) de la station
+             * @example 20
+             */
+            capacity?: number;
         } & {
             [key: string]: unknown;
         };

@@ -18,6 +18,7 @@ export type Utilisateur = NonNullable<
  */
 export type Station = components['schemas']['TotalVelos'];
 export type MoyenneVelos = components['schemas']['MoyenneVelos'];
+export type StationInfo = components['schemas']['StationInfo'];
 
 // ============================================
 // Configuration du client API
