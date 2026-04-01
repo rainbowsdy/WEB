@@ -30,10 +30,11 @@ export default function App() {
     .map((station) => ({
       id: station.num_station!,
       title: `VeloV: ${station.nom}`,
-      description: "Il y a t-il plus ou moins de Velov actuellement?",
+      description: "Le nombre actuel de vélos est-il au-dessus, en-dessous ou égal à la moyenne ?",
       icon: Bike,
       category: "Transport",
-      currentValue: `${station.moyenne_velos} vélos`,
+      currentValue: `Moyenne: ${station.moyenne_velos} vélos`,
+      averageValue: station.moyenne_velos!,
       odds: {
         Plus: 2.0,
         Moins: 2.0,

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LucideIcon, TrendingUp, Clock, Tag } from 'lucide-react';
-import { Utilisateur, updateMoney } from '../api';
+import { getTotalVelos, Utilisateur, updateMoney } from '../api';
 
 interface BetCardProps {
   bet: {
@@ -10,6 +10,7 @@ interface BetCardProps {
     icon: LucideIcon;
     category: string;
     currentValue: string;
+    averageValue: number;
     odds: Record<string, number | undefined>;
   };
   utilisateur: Utilisateur;
@@ -54,24 +55,55 @@ export function BetCard({ bet, utilisateur, onBetPlaced }: BetCardProps) {
     }
     
     try {
-      // Déduction du montant du solde
-      const newMoney = currentMoney - numAmount;
-      
-      // Mise à jour du solde dans la base de données
+      const totals = await getTotalVelos();
+      const currentStation = totals?.find((station) => station.num_station === bet.id);
+
+      if (!currentStation || currentStation.total_velos === undefined) {
+        throw new Error('Impossible de récupérer la valeur actuelle de la station');
+      }
+
+      const currentTotal = Number(currentStation.total_velos);
+      const averageTotal = Number(bet.averageValue);
+      const odds = bet.odds[selectedOption] || 0;
+
+      if (Number.isNaN(currentTotal) || Number.isNaN(averageTotal)) {
+        throw new Error('Valeurs de comparaison invalides pour ce pari');
+      }
+
+      const isWinningBet =
+        (selectedOption === 'Plus' && currentTotal > averageTotal) ||
+        (selectedOption === 'Moins' && currentTotal < averageTotal) ||
+        (selectedOption === 'Exactement' && currentTotal === averageTotal);
+
+      // Gain net: mise * (cote - 1). Ex: cote 2, mise 1 => +1 net.
+      const netGain = isWinningBet ? numAmount * (odds - 1) : -numAmount;
+      const newMoney = currentMoney + netGain;
+
       await updateMoney(utilisateur.username, newMoney);
-      
-      // Mise à jour de l'état local
       onBetPlaced(newMoney);
-      
-      const potentialWin = numAmount * (bet.odds[selectedOption] || 0);
-      alert(
-        `Pari placé avec succès !\n\n` +
-        `Option: ${selectedOption}\n` +
-        `Mise: ${numAmount.toFixed(2)}€\n` +
-        `Cote: ${bet.odds[selectedOption]}x\n` +
-        `Gain potentiel: ${potentialWin.toFixed(2)}€\n` +
-        `Nouveau solde: ${newMoney.toFixed(2)}€`
-      );
+
+      if (isWinningBet) {
+        alert(
+          `Pari gagné !\n\n` +
+          `Option: ${selectedOption}\n` +
+          `Mise: ${numAmount.toFixed(2)}€\n` +
+          `Cote: ${odds}x\n` +
+          `Moyenne: ${averageTotal.toFixed(2)} vélos\n` +
+          `Actuel: ${currentTotal} vélos\n` +
+          `Gain net: +${netGain.toFixed(2)}€\n` +
+          `Nouveau solde: ${newMoney.toFixed(2)}€`
+        );
+      } else {
+        alert(
+          `Pari perdu.\n\n` +
+          `Option: ${selectedOption}\n` +
+          `Mise: ${numAmount.toFixed(2)}€\n` +
+          `Moyenne: ${averageTotal.toFixed(2)} vélos\n` +
+          `Actuel: ${currentTotal} vélos\n` +
+          `Perte: -${numAmount.toFixed(2)}€\n` +
+          `Nouveau solde: ${newMoney.toFixed(2)}€`
+        );
+      }
       
       setSelectedOption(null);
       setAmount('');
