@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Dice1, Bike, LayoutGrid, Map as MapIcon } from 'lucide-react';
 import { BetCard } from './components/BetCard';
 import { Header } from './components/Header';
@@ -20,6 +20,7 @@ export default function App() {
   const [error, setError] = useState<string>('');
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
   const [selectedStationId, setSelectedStationId] = useState<number | null>(null);
+  const mapBetSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -107,6 +108,13 @@ export default function App() {
     setUtilisateur({ ...utilisateur, money: newMoney });
   };
 
+  const handleMapStationSelect = (id: number) => {
+    setSelectedStationId(id);
+    window.setTimeout(() => {
+      mapBetSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       <Header utilisateur={utilisateur} setUtilisateur={setUtilisateur} />
@@ -191,7 +199,7 @@ export default function App() {
                 <StationsMap
                   points={mapPoints}
                   selectedId={selectedStationId}
-                  onSelect={setSelectedStationId}
+                  onSelect={handleMapStationSelect}
                 />
                 <p className="text-center text-sm text-white/60">
                   Cliquez sur un marqueur pour sélectionner une station, puis pariez ci-dessous.
@@ -200,7 +208,10 @@ export default function App() {
             )}
 
             {selectedBet ? (
-              <div className="max-w-lg mx-auto">
+              <div
+                ref={mapBetSectionRef}
+                className="max-w-lg mx-auto scroll-mt-6"
+              >
                 <h2 className="text-center text-white/90 text-lg font-medium mb-3">Pari sur la station sélectionnée</h2>
                 <BetCard bet={selectedBet} utilisateur={utilisateur} onBetPlaced={handleBetPlaced} />
               </div>

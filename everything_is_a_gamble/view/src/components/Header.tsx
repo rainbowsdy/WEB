@@ -51,11 +51,20 @@ export function Header({ utilisateur, setUtilisateur }: HeaderProps) {
 
           <div className="flex items-center gap-6">
             {utilisateur.username && (
-              <div className="flex items-center gap-2 bg-green-500/20 border border-green-500/30 rounded-lg px-4 py-2">
-                <Wallet className="w-5 h-5 text-green-400" />
-                <span className="text-white">
-                  {(utilisateur.money ?? 0).toLocaleString()}€
+              <div className="flex items-center gap-3 bg-green-500/20 border border-green-500/30 rounded-lg px-4 py-2 max-w-[min(100vw-8rem,28rem)]">
+                <span
+                  className="text-white text-sm font-medium truncate min-w-0"
+                  title={utilisateur.username}
+                >
+                  {utilisateur.username}
                 </span>
+                <span className="h-5 w-px shrink-0 bg-white/25" aria-hidden />
+                <div className="flex items-center gap-2 shrink-0">
+                  <Wallet className="w-5 h-5 text-green-400" />
+                  <span className="text-white tabular-nums">
+                    {(utilisateur.money ?? 0).toLocaleString()}€
+                  </span>
+                </div>
               </div>
             )}
             {!utilisateur.username && (
