@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LucideIcon, TrendingUp, Clock, Tag } from 'lucide-react';
+import { getTotalVelos, Utilisateur, updateMoney } from '../api';
 
 interface BetCardProps {
   bet: {
@@ -9,21 +10,105 @@ interface BetCardProps {
     icon: LucideIcon;
     category: string;
     currentValue: string;
+    averageValue: number;
     odds: Record<string, number | undefined>;
   };
+  utilisateur: Utilisateur;
+  onBetPlaced: (newMoney: number) => void;
 }
 
-export function BetCard({ bet }: BetCardProps) {
+export function BetCard({ bet, utilisateur, onBetPlaced }: BetCardProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [amount, setAmount] = useState<string>('');
 
   const Icon = bet.icon;
 
-  const handlePlaceBet = () => {
-    if (selectedOption && amount) {
-      alert(`Paris placé !\n${selectedOption}: ${amount}€\nCote: ${bet.odds[selectedOption]}x`);
+  const handlePlaceBet = async () => {
+    const numAmount = parseFloat(amount);
+    
+    // Validation du montant
+    if (!selectedOption || !amount) {
+      return;
+    }
+    
+    if (isNaN(numAmount) || numAmount <= 0) {
+      alert('Veuillez entrer un montant valide supérieur à 0€');
+      return;
+    }
+    
+    if (numAmount < 1) {
+      alert('Le montant minimum est de 1€');
+      return;
+    }
+
+    // Vérification que l'utilisateur est connecté
+    if (!utilisateur.username) {
+      alert('Vous devez être connecté pour placer un pari');
+      return;
+    }
+
+    // Vérification du solde suffisant
+    const currentMoney = utilisateur.money ?? 0;
+    if (currentMoney < numAmount) {
+      alert(`Solde insuffisant ! Vous avez ${currentMoney.toFixed(2)}€ mais vous essayez de parier ${numAmount.toFixed(2)}€`);
+      return;
+    }
+    
+    try {
+      const totals = await getTotalVelos();
+      const currentStation = totals?.find((station) => station.num_station === bet.id);
+
+      if (!currentStation || currentStation.total_velos === undefined) {
+        throw new Error('Impossible de récupérer la valeur actuelle de la station');
+      }
+
+      const currentTotal = Number(currentStation.total_velos);
+      const averageTotal = Number(bet.averageValue);
+      const odds = bet.odds[selectedOption] || 0;
+
+      if (Number.isNaN(currentTotal) || Number.isNaN(averageTotal)) {
+        throw new Error('Valeurs de comparaison invalides pour ce pari');
+      }
+
+      const isWinningBet =
+        (selectedOption === 'Plus' && currentTotal > averageTotal) ||
+        (selectedOption === 'Moins' && currentTotal < averageTotal) ||
+        (selectedOption === 'Exactement' && currentTotal === averageTotal);
+
+      // Gain net: mise * (cote - 1). Ex: cote 2, mise 1 => +1 net.
+      const netGain = isWinningBet ? numAmount * (odds - 1) : -numAmount;
+      const newMoney = currentMoney + netGain;
+
+      await updateMoney(utilisateur.username, newMoney);
+      onBetPlaced(newMoney);
+
+      if (isWinningBet) {
+        alert(
+          `Pari gagné !\n\n` +
+          `Option: ${selectedOption}\n` +
+          `Mise: ${numAmount.toFixed(2)}€\n` +
+          `Cote: ${odds}x\n` +
+          `Moyenne: ${averageTotal.toFixed(2)} vélos\n` +
+          `Actuel: ${currentTotal} vélos\n` +
+          `Gain net: +${netGain.toFixed(2)}€\n` +
+          `Nouveau solde: ${newMoney.toFixed(2)}€`
+        );
+      } else {
+        alert(
+          `Pari perdu.\n\n` +
+          `Option: ${selectedOption}\n` +
+          `Mise: ${numAmount.toFixed(2)}€\n` +
+          `Moyenne: ${averageTotal.toFixed(2)} vélos\n` +
+          `Actuel: ${currentTotal} vélos\n` +
+          `Perte: -${numAmount.toFixed(2)}€\n` +
+          `Nouveau solde: ${newMoney.toFixed(2)}€`
+        );
+      }
+      
       setSelectedOption(null);
       setAmount('');
+    } catch (error) {
+      alert(`Erreur lors du placement du pari: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
@@ -95,7 +180,7 @@ export function BetCard({ bet }: BetCardProps) {
 
           {amount && (
             <p className="text-xs text-center text-white/60">
-              Gain potentiel: {0/*(parseFloat(amount) * bet.odds[selectedOption]).toFixed(2)*/}€
+              Gain potentiel: {(parseFloat(amount) * (bet.odds[selectedOption] || 0)).toFixed(2)}€
             </p>
           )}
         </div>
