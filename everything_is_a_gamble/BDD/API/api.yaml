@@ -294,7 +294,7 @@ paths:
                 type: object
                 properties:
                   error:
-                    type: string  
+                    type: string
                     example: "Erreur serveur"
 
 components:
