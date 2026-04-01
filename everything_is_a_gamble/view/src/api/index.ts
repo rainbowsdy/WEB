@@ -17,6 +17,7 @@ export type Utilisateur = NonNullable<
  * Type pour les données d'une station Vélo'v
  */
 export type Station = components['schemas']['TotalVelos'];
+export type MoyenneVelos = components['schemas']['MoyenneVelos'];
 
 // ============================================
 // Configuration du client API
@@ -126,6 +127,15 @@ export const getStationsInfo = async () => {
     if (error) throw new Error(handleApiError(error));
     return data;
 };
+/**
+ * Récupère les informations statiques des stations
+ */
+export const getMoyennes = async () => {
+    const { data, error } = await apiClient.GET('/moyennes');
+
+    if (error) throw new Error(handleApiError(error));
+    return data;
+};
 
 /**
  * Récupère l'historique d'une station
@@ -144,4 +154,3 @@ export const getStationHistory = async (
     return data;
 };
 
-// Made with Bob

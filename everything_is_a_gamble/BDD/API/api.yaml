@@ -247,6 +247,33 @@ paths:
                 items:
                   $ref: '#/components/schemas/StationInfo'
 
+  /moyennes:
+    get:
+      summary: Moyenne de vélos par station
+      description: |
+        Retourne la moyenne de vélos disponibles par station
+        (moyenne des vélos normaux + moyenne des vélos électriques),
+        arrondie à 2 décimales.
+      responses:
+        '200':
+          description: Liste des stations avec leur moyenne de vélos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MoyenneVelos'
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Erreur serveur"
+
   /stations/{id}/{type}:
     get:
       summary: Historique des données d'une station
@@ -346,6 +373,23 @@ components:
           type: integer
           description: Nombre de vélos classiques disponibles
           example: 10
+
+    MoyenneVelos:
+      type: object
+      properties:
+        nom:
+          type: string
+          description: Nom de la station
+          example: "Part-Dieu"
+        num_station:
+          type: integer
+          description: Identifiant de la station
+          example: 9101
+        moyenne_velos:
+          type: number
+          format: float
+          description: Moyenne du nombre total de vélos (normal + elec), arrondie à 2 décimales
+          example: 12.47
 
     StationInfo:
       type: object

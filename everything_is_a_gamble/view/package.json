@@ -16,7 +16,7 @@
     "build": "vite build",
     "type-check": "tsc --noEmit",
     "preview": "vite preview",
-    "generate:api": "openapi-typescript api.yaml -o src/api/schema.ts",
+    "generate:api": "openapi-typescript ../BDD/API/api.yaml -o src/api/schema.ts",
     "clean": "rm -rf build node_modules/.vite",
     "clobber": "npm run clean && rm -rf node_modules package-lock.json"
   },

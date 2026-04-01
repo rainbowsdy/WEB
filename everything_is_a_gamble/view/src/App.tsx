@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { Dice1, Bike } from 'lucide-react';
 import { BetCard } from './components/BetCard';
 import { Header } from './components/Header';
-import { getTotalVelos, Utilisateur, Station } from './api';
+import { Utilisateur, MoyenneVelos, getMoyennes } from './api';
 
 export default function App() {
-  const [stations, setStations] = useState<Station[]>([]);
+  const [moyennes, setMoyennes] = useState<MoyenneVelos[]>([]);
   const [utilisateur, setUtilisateur] = useState<Utilisateur>({ username: "", money: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -13,8 +13,8 @@ export default function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getTotalVelos();
-        setStations(data || []);
+        const data = await getMoyennes();
+        setMoyennes(data || []);
       } catch (error) {
         console.error("Erreur lors du fetch :", error);
         setError(error instanceof Error ? error.message : 'Erreur de chargement');
@@ -25,15 +25,15 @@ export default function App() {
     fetchData();
   }, []);
   
-  const bets = stations
-    .filter(station => station.nom && station.num_station && station.total_velos !== undefined)
+  const bets = moyennes
+    .filter(station => station.nom && station.num_station && station.moyenne_velos !== undefined)
     .map((station) => ({
       id: station.num_station!,
       title: `VeloV: ${station.nom}`,
       description: "Il y a t-il plus ou moins de Velov actuellement?",
       icon: Bike,
       category: "Transport",
-      currentValue: `${station.total_velos} vélos`,
+      currentValue: `${station.moyenne_velos} vélos`,
       odds: {
         Plus: 2.0,
         Moins: 2.0,
@@ -67,7 +67,7 @@ export default function App() {
         {/* Bets Grid */}
         {loading ? (
           <div className="text-center text-white">
-            <p className="text-xl">Chargement des stations...</p>
+            <p className="text-xl">Chargement des moyennes...</p>
           </div>
         ) : error ? (
           <div className="text-center text-red-400">

@@ -407,6 +407,59 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/moyennes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Moyenne de vélos par station
+         * @description Retourne la moyenne de vélos disponibles par station
+         *     (moyenne des vélos normaux + moyenne des vélos électriques),
+         *     arrondie à 2 décimales.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Liste des stations avec leur moyenne de vélos */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MoyenneVelos"][];
+                    };
+                };
+                /** @description Erreur serveur */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example Erreur serveur */
+                            error?: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/stations/{id}/{type}": {
         parameters: {
             query?: never;
@@ -536,6 +589,24 @@ export interface components {
              * @example 10
              */
             velo_normal?: number;
+        };
+        MoyenneVelos: {
+            /**
+             * @description Nom de la station
+             * @example Part-Dieu
+             */
+            nom?: string;
+            /**
+             * @description Identifiant de la station
+             * @example 9101
+             */
+            num_station?: number;
+            /**
+             * Format: float
+             * @description Moyenne du nombre total de vélos (normal + elec), arrondie à 2 décimales
+             * @example 12.47
+             */
+            moyenne_velos?: number;
         };
         /** @description Informations statiques d'une station */
         StationInfo: {
