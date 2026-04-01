@@ -63,7 +63,7 @@ export function BetCard({ bet, utilisateur, onBetPlaced }: BetCardProps) {
       }
 
       const currentTotal = Number(currentStation.total_velos);
-      const averageTotal = Number(bet.averageValue);
+      const averageTotal = Math.round(Number(bet.averageValue));
       const odds = bet.odds[selectedOption] || 0;
 
       if (Number.isNaN(currentTotal) || Number.isNaN(averageTotal)) {
@@ -88,7 +88,7 @@ export function BetCard({ bet, utilisateur, onBetPlaced }: BetCardProps) {
           `Option: ${selectedOption}\n` +
           `Mise: ${numAmount.toFixed(2)}€\n` +
           `Cote: ${odds}x\n` +
-          `Moyenne: ${averageTotal.toFixed(2)} vélos\n` +
+          `Moyenne (arrondie): ${averageTotal} vélos\n` +
           `Actuel: ${currentTotal} vélos\n` +
           `Gain net: +${netGain.toFixed(2)}€\n` +
           `Nouveau solde: ${newMoney.toFixed(2)}€`
@@ -98,7 +98,7 @@ export function BetCard({ bet, utilisateur, onBetPlaced }: BetCardProps) {
           `Pari perdu.\n\n` +
           `Option: ${selectedOption}\n` +
           `Mise: ${numAmount.toFixed(2)}€\n` +
-          `Moyenne: ${averageTotal.toFixed(2)} vélos\n` +
+          `Moyenne (arrondie): ${averageTotal} vélos\n` +
           `Actuel: ${currentTotal} vélos\n` +
           `Perte: -${numAmount.toFixed(2)}€\n` +
           `Nouveau solde: ${newMoney.toFixed(2)}€`

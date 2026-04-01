@@ -7,6 +7,11 @@ import { Utilisateur, MoyenneVelos, getMoyennes, getStationsInfo, StationInfo } 
 
 type ViewMode = 'cards' | 'map';
 
+/** Moyenne API arrondie à un nombre entier de vélos (aligné sur le total entier de /nb_total). */
+function bikesAverageRounded(raw: unknown): number {
+  return Math.round(Number(raw));
+}
+
 export default function App() {
   const [moyennes, setMoyennes] = useState<MoyenneVelos[]>([]);
   const [stationInfos, setStationInfos] = useState<StationInfo[]>([]);
@@ -51,21 +56,30 @@ export default function App() {
   }, [moyennes, stationInfos]);
 
   const bets = merged
-    .filter((station) => station.nom && station.num_station && station.moyenne_velos !== undefined)
-    .map((station) => ({
-      id: station.num_station!,
-      title: `VeloV: ${station.nom}`,
-      description: "Le nombre actuel de vélos est-il au-dessus, en-dessous ou égal à la moyenne ?",
-      icon: Bike,
-      category: "Transport",
-      currentValue: `Moyenne: ${station.moyenne_velos} vélos`,
-      averageValue: station.moyenne_velos!,
-      odds: {
-        Plus: 2.0,
-        Moins: 2.0,
-        Exactement: 5.0
+    .filter((station) => {
+      if (!station.nom || station.num_station == null || station.moyenne_velos === undefined) {
+        return false;
       }
-    }));
+      const rounded = bikesAverageRounded(station.moyenne_velos);
+      return !Number.isNaN(rounded);
+    })
+    .map((station) => {
+      const averageRounded = bikesAverageRounded(station.moyenne_velos);
+      return {
+        id: station.num_station!,
+        title: `VeloV: ${station.nom}`,
+        description: "Le nombre actuel de vélos est-il au-dessus, en-dessous ou égal à la moyenne ?",
+        icon: Bike,
+        category: "Transport",
+        currentValue: `Moyenne: ${averageRounded} vélos`,
+        averageValue: averageRounded,
+        odds: {
+          Plus: 2.0,
+          Moins: 2.0,
+          Exactement: 5.0
+        }
+      };
+    });
 
   const mapPoints = useMemo(
     () =>
